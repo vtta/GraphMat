@@ -11,7 +11,7 @@ TESTDIR=./test
 TESTBINDIR=./testbin
 
 ifeq (${CXX}, icpc)
-  CXX_OPTIONS=-qopenmp -std=c++11
+  CXX_OPTIONS=-qopenmp -std=c++11 -qopenmp-link=static
 else
   CXX_OPTIONS=-fopenmp --std=c++11 -I/usr/include/mpi/
 endif
@@ -39,7 +39,11 @@ ifeq (${timing}, 1)
 else
 endif
 
-LD_OPTIONS += -lboost_serialization
+ifeq (${CXX}, icpc)
+	LD_OPTIONS += -Wl,--allow-multiple-definition -Wl,-Bstatic -lboost_serialization -Wl,-Bdynamic -static_mpi -static-intel
+else
+	LD_OPTIONS += -lboost_serialization
+endif
 
 # --- Apps --- #
 sources = $(wildcard $(SRCDIR)/*.cpp)
